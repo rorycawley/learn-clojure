@@ -1,0 +1,11 @@
+{:min-bb-version "1.3.0"
+
+ :tasks
+ {jvm-repl {:doc "Start a JVM REPL with dev code on the classpath"
+            :task (clojure "-M:dev")}
+
+  jvm-run  {:doc "Run the app main function"
+            :task (clojure "-M:run")}
+
+  test     {:doc "Run the tests"
+            :task (clojure "-M:test" "-m" "app.test-runner")}}}

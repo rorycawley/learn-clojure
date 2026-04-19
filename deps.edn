@@ -1,0 +1,9 @@
+{:paths ["src"]
+
+ :deps
+ {org.clojure/clojure {:mvn/version "1.12.4"}}
+
+ :aliases
+ {:dev  {:extra-paths ["dev"]}
+  :test {:extra-paths ["test"]}
+  :run  {:main-opts ["-m" "app.core"]}}}

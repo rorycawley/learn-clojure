@@ -1,9 +1,21 @@
-{:paths ["src"]
+{:paths ["src" "resources"]
 
  :deps
  {org.clojure/clojure {:mvn/version "1.12.4"}}
 
  :aliases
- {:dev  {:extra-paths ["dev"]}
-  :test {:extra-paths ["test"]}
-  :run  {:main-opts ["-m" "app.core"]}}}
+ {:dev
+  {:extra-paths ["dev" "test"]
+   :jvm-opts ["-Dclojure.main.report=stderr"]}
+
+  :run
+  {:main-opts ["-m" "app.core"]}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}
+   :exec-fn kaocha.runner/exec-fn}
+
+  :outdated
+  {:deps {com.github.liquidz/antq {:mvn/version "2.11.1276"}}
+   :main-opts ["-m" "antq.core"]}}}

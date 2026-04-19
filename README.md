@@ -24,13 +24,13 @@ The aim is to build confidence with core Clojure concepts before adding framewor
 
 - **Clojure** via `deps.edn`
 - **Babashka** via `bb.edn`
-- **clojure.test** for basic tests
+- **clojure.test** for tests, run via **Kaocha**
 - **REPL-first workflow**
 
 ## Project structure
 
 ```text
-my-clojure-project/
+learn-clojure/
 ├─ deps.edn
 ├─ bb.edn
 ├─ src/
@@ -41,15 +41,46 @@ my-clojure-project/
 └─ test/
    └─ app/
       └─ core_test.clj
-````
+```
 
 ## Prerequisites
 
-Install the following:
+This project pins its tool versions in `.mise.toml`. The easiest way to get a matching toolchain is [mise](https://mise.jdx.dev/).
 
-* Java
-* Clojure CLI
-* Babashka
+Tools managed by mise:
+
+- Java 21
+- Clojure CLI
+- Babashka
+- clj-kondo (linter)
+- cljfmt (formatter)
+
+### Using mise (recommended)
+
+Install mise (once, globally) — see [getting started](https://mise.jdx.dev/getting-started.html). On macOS:
+
+```bash
+brew install mise
+```
+
+Make sure mise is activated in your shell (add to `~/.zshrc` or `~/.bashrc`):
+
+```bash
+eval "$(mise activate zsh)"   # or: mise activate bash
+```
+
+Then from the project root:
+
+```bash
+mise trust          # approve this repo's .mise.toml (one time)
+mise install        # install all tools at the pinned versions
+```
+
+After that, opening a shell in this directory puts `java`, `clojure`, `bb`, `clj-kondo`, and `cljfmt` on your `PATH` at the versions defined in `.mise.toml`. Run `mise ls` to confirm.
+
+### Without mise
+
+If you prefer to manage tools yourself, install: Java 21, Clojure CLI, Babashka, clj-kondo, cljfmt.
 
 ## Getting started
 
@@ -58,7 +89,7 @@ Clone the repo and move into the project directory.
 ### Start the REPL
 
 ```bash
-bb repl
+bb app:repl
 ```
 
 Then in the REPL:
@@ -72,13 +103,13 @@ Then in the REPL:
 ### Run the app
 
 ```bash
-bb run
+bb app:run
 ```
 
 ### Run the tests
 
 ```bash
-bb test
+bb app:test
 ```
 
 ## Development workflow
@@ -100,6 +131,12 @@ Example:
 
 This keeps development small, fast, and interactive.
 
+For the full loop — exploring in the REPL, writing tests, running `bb app:precommit`, and banking work with Git — see:
+
+- [WORKFLOW.md](WORKFLOW.md) — the full development loop
+- [DEFINITION-OF-DONE.md](DEFINITION-OF-DONE.md) — when a change is ready to commit
+- [COMMIT-MESSAGE-GUIDE.md](COMMIT-MESSAGE-GUIDE.md) — how to write commit messages
+
 ## Key files
 
 ### `src/app/core.clj`
@@ -108,9 +145,9 @@ Contains the main application code.
 
 This is where you will usually put:
 
-* simple functions
-* experiments with core language features
-* a small `-main` entry point
+- simple functions
+- experiments with core language features
+- a small `-main` entry point
 
 ### `dev/user.clj`
 
@@ -118,10 +155,10 @@ Your REPL entry point and playground.
 
 Use this namespace to:
 
-* require your app code
-* call functions manually
-* inspect library docs
-* experiment safely
+- require your app code
+- call functions manually
+- inspect library docs
+- experiment safely
 
 ### `test/app/core_test.clj`
 
@@ -134,9 +171,9 @@ Start small and test behaviour, not complexity.
 ### Terminal
 
 ```bash
-bb repl
-bb run
-bb test
+bb app:repl
+bb app:run
+bb app:test
 ```
 
 ### REPL
@@ -173,11 +210,11 @@ This project deliberately avoids early complexity.
 
 It does **not** include:
 
-* web frameworks
-* database integration
-* packaging/build pipelines
-* production infrastructure
-* large third-party libraries
+- web frameworks
+- database integration
+- packaging/build pipelines
+- production infrastructure
+- large third-party libraries
 
 That is by design.
 
@@ -187,11 +224,11 @@ The goal is to make the language easy to approach and easy to practice.
 
 Once the basics feel comfortable, possible next steps are:
 
-* add richer collection exercises
-* create a small command-line program
-* introduce spec or Malli later
-* add an nREPL-based editor workflow
-* build a tiny data transformation project
+- add richer collection exercises
+- create a small command-line program
+- introduce spec or Malli later
+- add an nREPL-based editor workflow
+- build a tiny data transformation project
 
 ## License
 

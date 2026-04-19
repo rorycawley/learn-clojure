@@ -1,6 +1,6 @@
 (ns user
   (:require [app.core :as app]
-            [clojure.repl :refer [doc source apropos find-doc]]))
+            [clojure.repl :refer [doc apropos find-doc]]))
 
 (comment
   (app/add 2 3)

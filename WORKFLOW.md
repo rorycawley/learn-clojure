@@ -1,684 +1,735 @@
-# WORKFLOW.md
+# Developer Workflow
 
-## Purpose
+This project is developed using a **patient, single-focus, REPL-first workflow**.
 
-This file defines the standard development workflow for this repo.
+The goal is not to rush.  
+The goal is to work as a **clear, repeatable system**.
 
-The goal is to make development **repeatable, calm, and mechanical**.
+A good session in this repo looks like this:
 
-The workflow is designed for deep focus on **one single thing at a time**:
-
-- one change
-- one loop
-- one branch
-- one verified commit
-
-A commit is **banked work**.  
-Once it is tested, checked, and committed, it is safely stored.
-
----
-
-## Why This Workflow Exists
-
-### 1. To reduce mental overload
-
-Working on multiple things at once creates drift, context switching, and half-finished work.
-
-This workflow forces the work into a small loop so that progress is always visible.
-
-### 2. To use the REPL properly
-
-The REPL is the fastest way to explore, probe, and understand code.
-It should be used before large edits and during development, not as an afterthought.
-
-### 3. To turn tests into evidence
-
-Tests are not decoration.
-They are evidence that the behaviour works and stays working.
-
-### 4. To make git feel safe
-
-Git is not just source control.
-Git is the place where verified work is banked.
-
-Uncommitted work is still fluid.
-Committed work is saved.
+1. choose **one single thing**
+2. explore it in the REPL
+3. write or change code
+4. write or change tests
+5. run checks
+6. review the diff
+7. commit it to Git
+8. treat the commit as **banked work**
 
 ---
 
-## The Core Operating Model
+## 1. Core idea
 
-### The rule: one thing at a time
+This workflow is designed around a few rules.
 
-At any moment, work on exactly one clearly stated change.
-
-Use this sentence before starting:
-
-> I am changing **one behaviour**.  
-> I will know I am done when **one specific outcome** is true.
+### Rule 1: One thing at a time
+Only work on **one small change** at once.
 
 Examples:
 
-- "I am changing the account creation validation so blank names are rejected."
-- "I am changing the projector so it stores the current balance."
-- "I am changing the HTTP handler so it returns 404 for missing accounts."
+- add one function
+- change one behaviour
+- fix one bug
+- rename one concept
+- add one test case
 
-If the work starts branching into several things, stop and split it.
+Do not mix multiple concerns in one loop.
+
+Why:
+
+- it reduces cognitive load
+- it makes the REPL session easier to follow
+- it makes tests easier to understand
+- it makes commits meaningful
+- it makes rollback easy
+
+### Rule 2: Use the REPL to understand
+The REPL is where you **observe**, **probe**, **try**, and **verify**.
+
+Use it to:
+
+- call functions with sample data
+- inspect shapes of data
+- try transformations
+- check assumptions
+- load changed namespaces
+- get clear before writing more code
+
+The REPL is not a side activity.  
+It is the main thinking tool.
+
+### Rule 3: Tests make the change durable
+A working REPL experiment is good.  
+A test makes that behaviour **repeatable**.
+
+Use tests to lock in what you now know to be true.
+
+### Rule 4: Git is the bank
+A commit is not just storage.  
+A commit is **banked progress**.
+
+Once a change is understood, tested, checked, and committed, it is safe.  
+You do not need to mentally carry it anymore.
 
 ---
 
-## The Workflow Loop
+## 2. Workflow shape
 
-### Visual loop
+There are really only three modes of work in this repo:
 
-```text
-+-------------------+
-|  Choose one thing |
-+---------+---------+
-          |
-          v
-+-------------------+
-|  Probe in REPL    |
-|  Understand       |
-+---------+---------+
-          |
-          v
-+-------------------+
-|  Write/adjust     |
-|  test             |
-+---------+---------+
-          |
-          v
-+-------------------+
-|  Write minimum    |
-|  code             |
-+---------+---------+
-          |
-          v
-+-------------------+
-|  Re-check in REPL |
-|  Observe result   |
-+---------+---------+
-          |
-          v
-+-------------------+
-|  Run tests/checks |
-+---------+---------+
-          |
-          v
-+-------------------+
-|  Commit = bank it |
-+---------+---------+
-          |
-          v
-+-------------------+
-| Next single thing |
-+-------------------+
-```
-
-### Loop summary
-
-**Choose → Probe → Test → Code → Verify → Bank**
+1. **Explore**
+2. **Implement**
+3. **Bank**
 
 That is the whole system.
 
 ---
 
-## Standard Commands
+## 3. The workflow loop
 
-The repo should expose a small, stable command surface through `bb`.
+```text
+┌─────────────┐
+│ Pick 1 thing│
+└──────┬──────┘
+       │
+       v
+┌─────────────┐
+│ Start REPL  │
+│ bb app:repl │
+└──────┬──────┘
+       │
+       v
+┌──────────────────────┐
+│ Explore the behaviour│
+│ and data patiently   │
+└──────┬───────────────┘
+       │
+       v
+┌──────────────────────┐
+│ Write/change code    │
+│ in small steps       │
+└──────┬───────────────┘
+       │
+       v
+┌──────────────────────┐
+│ Write/change tests   │
+│ to lock behaviour in │
+└──────┬───────────────┘
+       │
+       v
+┌──────────────────────┐
+│ Run checks           │
+│ bb app:precommit     │
+└──────┬───────────────┘
+       │
+       v
+┌──────────────────────┐
+│ Review the diff      │
+│ bb git:diff          │
+└──────┬───────────────┘
+       │
+       v
+┌──────────────────────┐
+│ Commit to Git        │
+│ = bank the work      │
+└──────┬───────────────┘
+       │
+       v
+┌─────────────┐
+│ Next 1 thing│
+└─────────────┘
+```
 
-The exact underlying tool may change (`clj`, `lein`, etc.), but the outer workflow should stay the same.
+---
 
-### Standard task names
+## 4. Standard session workflow
+
+### 4.1 Start of session
+
+#### What
+
+Prepare the environment and reduce friction.
+
+#### Why
+
+A smooth start makes it easier to stay focused.
+
+#### How
+
+```bash
+bb app:deps
+bb git:branch
+bb git:status
+bb app:repl
+```
+
+#### Notes
+
+- `bb app:deps` warms dependencies and classpath caches
+- `bb git:branch` confirms where you are
+- `bb git:status` confirms your working tree state
+- `bb app:repl` starts the REPL with dev + test paths
+
+---
+
+### 4.2 Pick the one thing
+
+#### What
+
+Define a **single small target** for the loop.
+
+#### Why
+
+ADHD does better with a tight target than with an open field.
+
+#### How
+
+Write a one-line statement before you begin.
+
+Examples:
+
+- `Add money parser for string input`
+- `Fix interest calculation rounding`
+- `Rename account status predicate`
+- `Add test for overdraft rejection`
+
+If the statement contains `and`, it is probably too big.
+
+Bad:
+
+- `Fix transfer logic and improve naming and clean tests`
+
+Good:
+
+- `Fix transfer rejection when balance is insufficient`
+
+---
+
+### 4.3 Explore in the REPL
+
+#### What
+
+Use the REPL to understand the current behaviour and try the next behaviour.
+
+#### Why
+
+Clojure is easiest to learn and develop when feedback is immediate.
+
+#### How
+
+Typical REPL actions:
+
+- require or reload namespaces
+- call functions with sample data
+- inspect return values
+- check data shapes
+- experiment before committing to code structure
+
+Typical pattern:
+
+```clojure
+(require 'your.namespace :reload)
+(comment
+  ;; try examples here
+  )
+```
+
+#### REPL questions to ask
+
+- What goes in?
+- What comes out?
+- Is the data shape what I expected?
+- What is the smallest function that would make this easier?
+- Can I make the behaviour visible with one simple test?
+
+Do not stay in the REPL forever.
+The REPL is for learning and checking.
+Once you understand the move, write it into code and tests.
+
+---
+
+### 4.4 Change code in small steps
+
+#### What
+
+Make the smallest code change that moves the behaviour forward.
+
+#### Why
+
+Small changes are easier to reason about, test, lint, and commit.
+
+#### How
+
+Preferred approach:
+
+1. change one function or one tiny set of related functions
+2. keep names clear
+3. keep data shapes simple
+4. avoid broad refactors unless that is the single goal of the loop
+
+#### Guideline
+
+Prefer several small loops over one heroic change.
+
+---
+
+### 4.5 Write or update tests
+
+#### What
+
+Turn the behaviour you just proved in the REPL into an automated test.
+
+#### Why
+
+The REPL proves it once.
+The test proves it forever.
+
+#### How
+
+Run tests with:
+
+```bash
+bb app:test
+```
+
+Use tests to describe behaviour, not implementation detail.
+
+Good test focus:
+
+- given input X, result is Y
+- when invalid input is supplied, the function rejects it
+- when event A happens, state B results
+
+Avoid testing internal trivia unless it matters to behaviour.
+
+---
+
+### 4.6 Run quality checks
+
+#### What
+
+Run the standard checks before committing.
+
+#### Why
+
+This creates a consistent quality gate and reduces regressions.
+
+#### How
+
+For quick manual checks:
+
+```bash
+bb app:lint
+bb app:fmt:check
+bb app:test
+```
+
+Standard combined check:
+
+```bash
+bb app:precommit
+```
+
+This is the main checkpoint command.
+
+`bb app:precommit` runs:
+
+- lint
+- formatting check
+- tests
+
+If it fails, fix the issue before committing.
+
+If formatting is the issue:
+
+```bash
+bb app:fmt:fix
+bb app:fmt:check
+```
+
+---
+
+## 5. Git workflow
+
+This repo uses a **simple banking workflow**.
+
+The idea is:
+
+- do one small piece of work
+- verify it
+- commit it
+- treat that commit as safely stored
+
+For a solo developer, this should stay simple.
+
+---
+
+### 5.1 Branch workflow
+
+Use **short-lived branches** for each small change.
+
+#### Why
+
+This gives you isolation and clarity without much overhead.
+
+#### Branch naming
+
+Use names that describe the change.
+
+Examples:
+
+- `feat/add-money-parser`
+- `fix/rounding-in-interest`
+- `refactor/rename-account-predicates`
+- `test/add-overdraft-cases`
+
+Check branch:
+
+```bash
+bb git:branch
+```
+
+View status:
+
+```bash
+bb git:status
+```
+
+View change size:
+
+```bash
+bb git:diff
+```
+
+---
+
+### 5.2 Commit workflow
+
+A commit should represent **one coherent completed step**.
+
+#### Commit when all are true
+
+- the change does one thing
+- the behaviour was explored in the REPL
+- the code is clear enough
+- tests cover the behaviour
+- `bb app:precommit` passes
+- the diff has been reviewed
+
+#### Commit message style
+
+Use a short imperative subject.
+
+Examples:
+
+- `Add money parser for string amounts`
+- `Fix overdraft validation`
+- `Rename transaction status helpers`
+- `Add tests for account closure rules`
+
+A commit message should answer:
+
+**What did I bank?**
+
+---
+
+### 5.3 Banking rule
+
+After a good commit:
+
+- stop carrying that work mentally
+- trust the system
+- move on to the next small thing
+
+A commit is a checkpoint.
+It is not just a backup.
+It is a deliberate deposit.
+
+---
+
+### 5.4 Suggested Git sequence
+
+```bash
+git switch -c feat/add-money-parser
+bb app:precommit
+bb git:diff
+bb git:status
+git add .
+git commit -m "Add money parser for string amounts"
+```
+
+If you use a remote:
+
+```bash
+git push -u origin feat/add-money-parser
+```
+
+---
+
+## 6. Daily working modes
+
+A session usually falls into one of these modes.
+
+### 6.1 Learning mode
+
+Use when the problem is not yet clear.
+
+Focus:
+
+- REPL exploration
+- reading code
+- tracing data
+- tiny experiments
+
+Goal:
+
+- understand the next move
+
+Typical commands:
 
 ```bash
 bb app:repl
+bb git:status
+```
+
+### 6.2 Building mode
+
+Use when the change is understood.
+
+Focus:
+
+- implement one behaviour
+- add tests
+- keep scope tight
+
+Typical commands:
+
+```bash
+bb app:test
+bb app:lint
+bb app:fmt:check
+```
+
+### 6.3 Banking mode
+
+Use when the change is ready to be stored.
+
+Focus:
+
+- run the full checks
+- review the diff
+- commit cleanly
+
+Typical commands:
+
+```bash
+bb app:precommit
+bb git:diff
+bb git:status
+git add .
+git commit -m "..."
+```
+
+---
+
+## 7. Recovery workflow when overwhelmed
+
+When the mind gets noisy, do not try to solve everything.
+
+Return to the system.
+
+### Recovery steps
+
+1. stop
+2. check status
+3. name the one thing
+4. start or return to the REPL
+5. make one tiny move
+
+Commands:
+
+```bash
+bb git:status
+bb git:diff
+bb app:repl
+```
+
+Then ask:
+
+- What exactly am I changing?
+- What is the smallest possible step?
+- Can I prove it in the REPL first?
+- Can I write one test for it?
+
+If still overwhelmed, reduce scope again.
+
+Examples:
+
+Instead of:
+
+- `implement transfers`
+
+Reduce to:
+
+- `write a function that subtracts an amount from a balance`
+- `write one test for insufficient funds`
+- `load namespace and try three examples in REPL`
+
+---
+
+## 8. Definition of done for one loop
+
+A loop is done when:
+
+- the change does one thing
+- the behaviour was explored in the REPL
+- the code is clear enough
+- tests cover the behaviour
+- `bb app:precommit` passes
+- the diff has been reviewed
+- the change is committed
+
+That is enough.
+
+Do not keep polishing once the loop is done.
+Bank it.
+
+---
+
+## 9. Command reference
+
+### Start / warm up
+
+```bash
+bb app:deps
+bb app:repl
 bb app:run
+```
+
+### Verification
+
+```bash
 bb app:test
 bb app:lint
 bb app:fmt:check
 bb app:fmt:fix
 bb app:precommit
+bb app:antq
 ```
 
-### Why
+### Git awareness
 
-This keeps the workflow consistent across time.
-You should not have to remember different low-level commands for each repo.
-
-### Note
-
-The sample `bb.edn` already includes most of these.
-Add `app:repl` if it does not exist yet.
-
-Example:
-
-```clojure
-app:repl {:doc "Start REPL"
-          :task (sh "clj" "-M:dev")}
+```bash
+bb git:status
+bb git:diff
+bb git:branch
 ```
-
-If this repo is still using Leiningen internally, the wrapper can call `lein repl` instead.
-The important thing is the **workflow contract**, not the underlying command.
 
 ---
 
-## Start-of-Session Workflow
+## 10. Recommended working rhythm
 
-## Why
+For each piece of work:
 
-The start of a session should reduce ambiguity.
-Do not begin by wandering.
+1. **pick one thing**
+2. **explore in REPL**
+3. **change code**
+4. **change tests**
+5. **run `bb app:precommit`**
+6. **review diff**
+7. **commit**
+8. **repeat**
 
-## What
-
-Before writing code, establish:
-
-- what single thing you are changing
-- where you will explore it
-- what "done" means
-
-## How
-
-### 1. Sync the repo
-
-```bash
-git switch main
-git pull --ff-only
-```
-
-### 2. Create a short-lived branch for one change
-
-```bash
-git switch -c feat/single-clear-change
-```
-
-Branch names should describe one thing only.
-
-Examples:
+In short:
 
 ```text
-feat/reject-blank-account-name
-fix/return-404-for-missing-account
-refactor/extract-balance-fold
-test/add-projector-coverage
+Pick 1 thing -> REPL -> Code -> Test -> Precommit -> Review -> Commit
 ```
 
-### 3. Write the change statement
+That is the main loop.
 
-In your notes, issue, or scratchpad, write:
+---
 
-- **Change:** one sentence
-- **Done means:** one sentence
+## 11. Practical example
 
-Example:
+Example: adding a parser for money values.
 
-- Change: return 404 when account is missing
-- Done means: handler test proves missing account gets 404
+### Step 1
 
-### 4. Start the REPL
+Choose the one thing:
+
+```text
+Add parser for string money amounts
+```
+
+### Step 2
+
+Start REPL:
 
 ```bash
 bb app:repl
 ```
 
----
+### Step 3
 
-## Development Workflow: The Main Loop
+Try examples manually in the REPL.
 
-## Step 1: Probe in the REPL
+- valid input
+- invalid input
+- edge cases
 
-### Why
+### Step 4
 
-Before changing code, understand the current behaviour in the smallest possible way.
+Implement the smallest function.
 
-### What
+### Step 5
 
-Use the REPL to:
+Add tests for:
 
-- call the function directly
-- inspect inputs and outputs
-- reduce the problem to a small example
-- explore the domain shape
+- valid amount
+- invalid amount
+- empty string
 
-### How
+### Step 6
 
-Examples:
-
-- load the namespace
-- call the function with sample data
-- reduce large input data to the smallest useful case
-- try possible transformations until the behaviour is clear
-
-The REPL is for **understanding**.
-
-Do not start by editing five files if you do not yet understand the shape of the problem.
-
----
-
-## Step 2: Write or adjust a test
-
-### Why
-
-The test captures the intended behaviour before or during the code change.
-
-### What
-
-Write the smallest test that expresses the behaviour being changed.
-
-### How
-
-Good tests are:
-
-- small
-- behaviour-focused
-- easy to read
-- close to the language of the domain
-
-Ask:
-
-- What should happen?
-- What should not happen?
-- What is the smallest test that proves it?
-
-If the change is exploratory, you may use the REPL first and write the test once the behaviour becomes clear.
-
----
-
-## Step 3: Write the minimum code
-
-### Why
-
-Smaller changes are easier to understand, verify, and commit.
-
-### What
-
-Write only enough code to satisfy the current behaviour.
-
-### How
-
-Prefer:
-
-- small edits
-- local changes
-- clear names
-- simple data transformations
-
-Avoid:
-
-- speculative abstractions
-- unrelated cleanup
-- mixing refactor + feature + rename + style changes in one pass
-
-One commit should tell one story.
-
----
-
-## Step 4: Re-check in the REPL
-
-### Why
-
-The REPL gives immediate feedback and helps you observe what changed.
-
-### What
-
-Re-run the current code in the REPL after the edit.
-
-### How
-
-Use the REPL to confirm:
-
-- the function now behaves as expected
-- the data shape is correct
-- the transformation is understandable
-- the next edit is actually necessary
-
-This is the **observe** part of the loop.
-
----
-
-## Step 5: Run focused verification
-
-### Why
-
-You need fast evidence while still in flow.
-
-### What
-
-Run the smallest meaningful verification first.
-
-### How
-
-Usually:
-
-1. run the relevant test namespace or test
-2. run all tests
-3. run formatting/linting checks
-4. run the full precommit task
-
-At minimum before commit:
+Run checks:
 
 ```bash
-bb app:test
 bb app:precommit
 ```
 
-If formatting is needed:
+### Step 7
+
+Inspect changes:
 
 ```bash
-bb app:fmt:fix
+bb git:diff
+bb git:status
 ```
 
----
+### Step 8
 
-## The Commit Rule
-
-A commit is a banked checkpoint.
-
-Do not commit random motion.
-Commit verified progress.
-
-### Commit only when all of these are true
-
-- the change is about one thing
-- the code is understandable
-- the relevant tests pass
-- repo checks pass
-- you have read the diff
-- the commit message says what changed
-
-### Before every commit
+Commit:
 
 ```bash
-git status
-git diff
-bb app:precommit
+git add .
+git commit -m "Add parser for string money amounts"
 ```
 
-### Stage carefully
-
-Prefer:
-
-```bash
-git add -p
-```
-
-This helps keep unrelated edits out of the commit.
-
-### Commit message format
-
-Use clear, behavioural messages.
-
-Examples:
-
-```text
-feat(account): reject blank account name
-fix(api): return 404 for missing account
-refactor(balance): extract fold from handler
-test(projector): cover account-closed case
-```
+Now it is banked.
 
 ---
 
-## Git Workflow
-
-## Why
-
-Git should support the development loop, not disrupt it.
-
-## What
-
-Use short-lived branches and small verified commits.
-
-## How
-
-### 1. Start from updated main
-
-```bash
-git switch main
-git pull --ff-only
-git switch -c feat/single-clear-change
-```
-
-### 2. Work in small verified loops
-
-Repeat:
-
-- REPL
-- test
-- code
-- verify
-
-### 3. Bank progress with a commit
-
-```bash
-git add -p
-git commit -m "feat(account): reject blank account name"
-```
-
-### 4. Push the branch
-
-```bash
-git push -u origin feat/single-clear-change
-```
-
-### 5. Merge only verified work
-
-Preferred: open a PR, review your own diff carefully, then merge.
-
-If working solo and merging directly, still do a self-review first.
-
-### 6. After merge
-
-```bash
-git switch main
-git pull --ff-only
-git branch -d feat/single-clear-change
-```
-
----
-
-## WIP Rule
-
-If you are interrupted and the work is not yet bankable:
-
-- do **not** pretend it is done
-- either keep it local
-- or make a clearly marked temporary commit on the branch
-
-Example:
-
-```text
-wip: reduce failing projector case to minimal example
-```
-
-Rules for WIP commits:
-
-- never merge them as-is
-- replace or squash them later
-- use them only to save interrupted work
-
-A WIP commit is **shelving**, not banking.
-
----
-
-## End-of-Session Workflow
-
-## Why
-
-A good ending makes the next start easier.
-
-## What
-
-End with either:
-
-- a clean banked commit, or
-- a clear restart note
-
-## How
-
-### Best case: end on green
-
-- tests passing
-- precommit passing
-- commit created
-- branch pushed
-
-### If not finished
-
-Leave a restart note in plain language:
-
-- what is true now
-- what is broken now
-- what the next smallest step is
-
-Example:
-
-```text
-Current state:
-- handler path isolated
-- missing-account case reproduced
-- test written and failing
-
-Next step:
-- fix lookup result handling in api namespace
-```
-
-The next session should begin from that note, not from memory.
-
----
-
-## Stuck Protocol
-
-When stuck, do not thrash.
-
-Use this order:
-
-### 1. Go back to the REPL
-
-Reduce the problem to the smallest possible example.
-
-### 2. Shrink the change
-
-Ask:
-
-- Can I make this problem smaller?
-- Can I isolate one function?
-- Can I test one behaviour only?
-
-### 3. Separate understanding from implementation
-
-If confused, stop editing and just explore.
-
-### 4. Write one tiny failing test
-
-A tiny failing test often reveals what the real problem is.
-
-### 5. Avoid side quests
-
-Do not rename unrelated things.
-Do not "clean up while I'm here".
-Do not switch to another task.
-
-Return to the loop.
-
----
-
-## Workflow Rules for This Repo
-
-These are the standing rules:
-
-1. Work on one thing at a time.
-2. Start with understanding, usually in the REPL.
-3. Capture behaviour with tests.
-4. Write the minimum code needed.
-5. Verify before committing.
-6. Commit only bankable work.
-7. Keep branches short-lived.
-8. End each session with either a green commit or a restart note.
-
----
-
-## The Daily Mechanical Loop
-
-Use this exact mental model:
-
-### Before work
-- choose one thing
-
-### During work
-- REPL
-- test
-- code
-- verify
-
-### Before commit
-- diff
-- precommit
-- self-review
-
-### After verification
-- commit
-- push
-- merge
-
-### Then
-- choose the next one thing
-
----
-
-## Short Version
-
-If in doubt, do this:
-
-```text
-1. Choose one behaviour
-2. Start REPL
-3. Reproduce / explore
-4. Write test
-5. Write minimum code
-6. Re-check in REPL
-7. Run bb app:precommit
-8. Read git diff
-9. Commit = bank it
-10. Repeat
-```
-
----
-
-## Optional Improvement to `bb.edn`
-
-To support this workflow well, make sure the repo exposes at least these tasks:
-
-```clojure
-{:tasks
- {:init ...
-  app:repl {:doc "Start REPL"
-            :task (sh "clj" "-M:dev")}
-  app:run {:doc "Start application"
-           :task (sh "clj" "-M:run")}
-  app:test {:doc "Run all tests"
-            :task (sh "clj" "-M:test")}
-  app:lint {:doc "Lint with clj-kondo"
-            :task (sh "clj-kondo" "--parallel" "--lint" "src:test:dev")}
-  app:fmt:check {:doc "Check code format"
-                 :task (sh "cljfmt" "check")}
-  app:fmt:fix {:doc "Fix code format"
-               :task (sh "cljfmt" "fix")}
-  app:precommit {:doc "Run all checks and tests"
-                 :depends [app:lint app:fmt:check app:test]}}}
-```
-
-The exact internals can vary.
-The workflow should not.
-
----
-
-## Final Principle
-
-Do not try to win by speed.
-
-Win by running the loop consistently:
-
-**Choose → Probe → Test → Code → Verify → Bank**
+## 12. Final principle
+
+Do not try to be fast.
+Do not try to hold the whole system in your head.
+Do not try to finish everything.
+
+Follow the loop.
+
+One thing.
+Patiently explored.
+Clearly coded.
+Tested.
+Banked.

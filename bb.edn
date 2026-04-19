@@ -1,11 +1,88 @@
 {:min-bb-version "1.3.0"
 
  :tasks
- {jvm-repl {:doc "Start a JVM REPL with dev code on the classpath"
-            :task (clojure "-M:dev")}
+ {:requires ([babashka.fs :as fs]
+             [babashka.process :refer [shell]])
 
-  jvm-run  {:doc "Run the app main function"
-            :task (clojure "-M:run")}
+  :init
+  (do
+    (def project-paths
+      (->> ["src" "test" "dev"]
+           (filter fs/exists?)
+           vec))
 
-  test     {:doc "Run the tests"
-            :task (clojure "-M:test" "-m" "app.test-runner")}}}
+    (defn sh [& args]
+      (binding [*out* *err*]
+        (apply println "+" args))
+      (let [result (apply shell {:in  :inherit
+                                 :out :inherit
+                                 :err :inherit}
+                          args)]
+        (when-not (zero? (:exit result))
+          (throw (ex-info (str "Command failed: " (pr-str args))
+                          {:args args
+                           :exit (:exit result)})))
+        result))
+
+    (defn clj [& args]
+      (apply sh "clojure" args))
+
+    (defn repl-clj [& args]
+      (apply sh "clj" args))
+
+    (defn git [& args]
+      (apply sh "git" args)))
+
+  app:deps
+  {:doc "Prefetch deps and warm the classpath cache"
+   :task (clj "-P" "-A:dev:test:run:outdated")}
+
+  app:repl
+  {:doc "Start a REPL with dev + test paths"
+   :task (repl-clj "-A:dev")}
+
+  app:run
+  {:doc "Run the app main namespace"
+   :task (clj "-M:run")}
+
+  app:test
+  {:doc "Run all tests with Kaocha"
+   :task (clj "-X:test")}
+
+  app:lint
+  {:doc "Lint src/test/dev with clj-kondo"
+   :task (if (seq project-paths)
+           (apply sh "clj-kondo" "--parallel" "--lint" project-paths)
+           (println "No src/test/dev paths found."))}
+
+  app:fmt:check
+  {:doc "Check code format with cljfmt"
+   :task (if (seq project-paths)
+           (apply sh "cljfmt" "check" project-paths)
+           (println "No src/test/dev paths found."))}
+
+  app:fmt:fix
+  {:doc "Fix code format with cljfmt"
+   :task (if (seq project-paths)
+           (apply sh "cljfmt" "fix" project-paths)
+           (println "No src/test/dev paths found."))}
+
+  app:precommit
+  {:doc "Run the standard pre-commit checks"
+   :depends [app:lint app:fmt:check app:test]}
+
+  app:antq
+  {:doc "Check for outdated dependencies"
+   :task (clj "-M:outdated")}
+
+  git:status
+  {:doc "Show concise git status"
+   :task (git "status" "--short")}
+
+  git:diff
+  {:doc "Show git diff stat"
+   :task (git "diff" "--stat")}
+
+  git:branch
+  {:doc "Show current branch"
+   :task (git "branch" "--show-current")}}}

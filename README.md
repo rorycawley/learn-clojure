@@ -1,6 +1,3 @@
-Here’s a more polished, GitHub-ready `README.md`:
-
-````markdown
 # my-clojure-project
 
 [![Clojure](https://img.shields.io/badge/Clojure-1.12.4-blue.svg)](https://clojure.org/)

@@ -1,4 +1,4 @@
-# my-clojure-project
+# learn-clojure
 
 [![Clojure](https://img.shields.io/badge/Clojure-1.12.4-blue.svg)](https://clojure.org/)
 [![Babashka](https://img.shields.io/badge/Babashka-Task%20Runner-orange.svg)](https://babashka.org/)
